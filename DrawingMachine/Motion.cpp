@@ -22,6 +22,7 @@ void Motion::init() {
 
   pinMode(PIN_LINEAR_MINSTOP, INPUT_PULLUP);
   pinMode(PIN_ENABLE, OUTPUT);
+
   disable();
 }
 
@@ -45,10 +46,12 @@ void Motion::home() {
 
 void Motion::disable() {
   digitalWrite(PIN_ENABLE, LOW);
+  digitalWrite(PIN_SOLENOID, LOW);
 }
 
 void Motion::enable() {
   digitalWrite(PIN_ENABLE, HIGH);
+  digitalWrite(PIN_SOLENOID, HIGH);
 }
 
 void Motion::relative() {
@@ -71,7 +74,10 @@ void Motion::move(float x, float y, float e) {
     y += position_y_;
     e += position_e_;
   }
-  
+
+  digitalWrite(PIN_SOLENOID, (e <= position_e_) ^ INVERT_SOLENOID);
+  position_e_ = e;
+
   long positions[2] = {
     sqrt(x * x + y * y) * (long) STEPS_PER_MM, //linear position
     (long) (atan2(y, x) * STEPS_PER_RADIAN) //rotary position

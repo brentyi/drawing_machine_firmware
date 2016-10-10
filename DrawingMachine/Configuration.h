@@ -1,7 +1,7 @@
 /*
- * Drawing machine configuration file
- * Standard units: millimeters, radians
- */
+   Drawing machine configuration file
+   Standard units: millimeters, radians
+*/
 
 
 /// Physical properties

@@ -67,7 +67,43 @@ void Motion::setPosition(float x, float y, float e) {
   position_y_ = y;
   position_e_ = e;
 }
+void Motion::moveDirect(float x, float y, float e) {
+  digitalWrite(PIN_SOLENOID, (e <= position_e_) ^ INVERT_SOLENOID);
+  position_e_ = e;
 
+  
+
+  long linear_position = sqrt(x * x + y * y) * (long) STEPS_PER_MM;
+  long rotary_position = (long) (atan2(y, x) * STEPS_PER_RADIAN);
+  /*
+  long flinear = linear_position;
+  long frotary = rotary_position;
+
+  long nlinear;
+  long nrotary;
+
+  if(x <= 0 && y <= 0){
+    nlinear = -1*linear_position;
+    nrotary = rotary_position + 3.14;
+  }
+
+  if(nrotary < rotary_position){
+    flinear = nlinear;
+    frotary = nrotary;
+  }
+  
+  */
+  long positions[2] = {
+    linear_position,//linear position
+    rotary_position //rotary position
+  };
+  steppers_->moveTo(positions);
+  steppers_->runSpeedToPosition();
+
+  position_x_ = x;
+  position_y_ = y;
+  position_e_ = e;
+}
 void Motion::move(float x, float y, float e) {
   enable();
 
@@ -77,16 +113,31 @@ void Motion::move(float x, float y, float e) {
     e += position_e_;
   }
 
-  digitalWrite(PIN_SOLENOID, (e <= position_e_) ^ INVERT_SOLENOID);
-  position_e_ = e;
+  //brent method "This is not the proper way to do it, we need to figure this out"
+  long distance = sqrt(x * x + y * y) * (long) STEPS_PER_MM;
+  long slope = (y - position_y_)/(x - position_x_);
 
-  long positions[2] = {
-    sqrt(x * x + y * y) * (long) STEPS_PER_MM, //linear position
-    (long) (atan2(y, x) * STEPS_PER_RADIAN) //rotary position
-  };
-  steppers_->moveTo(positions);
-  steppers_->runSpeedToPosition();
+  if(distance <= MAX_DIST){
+    moveDirect(x,y,e);
+  }
+  else{
+    int count = 1;
+    float frac = distance / MOVE_AMOUNT; 
+    float x_offset = x - position_x_;
+    float y_offset = y - position_y_;
+    float e_offset = e - position_e_;
+    while(count <= frac){ //brent you should fix it
+      moveDirect(
+        position_x_ + x_offset * count / frac,
+        position_y_ + y_offset * count / frac,
+        e + e_offset * count / frac
+      );
+      count++;
+    }
+  }
 }
+
+
 
 float Motion::getStationaryX() {
   return relative_mode_ ? 0 : position_x_;

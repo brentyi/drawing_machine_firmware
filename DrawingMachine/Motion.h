@@ -22,6 +22,8 @@ class Motion{
     void setPosition(float x, float y, float e);
 
     void move(float x, float y, float e);
+
+    void moveDirect(float x, float y, float e);
     
     void home();
     

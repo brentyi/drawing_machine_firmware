@@ -34,6 +34,9 @@ class Motion{
     float getStationaryX();
     float getStationaryY();
     float getStationaryE();
+    float getX();
+    float getY();
+    float getE();
 };
 
 #endif MOTION_H

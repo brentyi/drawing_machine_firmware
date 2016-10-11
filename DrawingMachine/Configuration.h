@@ -4,7 +4,7 @@
 */
 
 /// Physical properties
-#define TABLE_RADIUS 200
+#define TABLE_DIAMETER 238
 #define STEPS_PER_MM 1600 // 200 steps per revolution * 16 microsteps / 2mm per revolution
 #define STEPS_PER_RADIAN 4309.42615 // 200 steps per revolution * 16 microsteps * 110 / 13 gear ratio / 2pi
 

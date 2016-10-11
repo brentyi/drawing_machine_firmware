@@ -33,7 +33,7 @@ void Motion::home() {
   while (digitalRead(PIN_LINEAR_MINSTOP)) {
     linear_stepper_->runSpeed();
   }
-  linear_stepper_->move((long) TABLE_RADIUS /  2 * STEPS_PER_MM);
+  linear_stepper_->move((long) TABLE_DIAMETER /  2 * STEPS_PER_MM);
   linear_stepper_->runToPosition();
 
   linear_stepper_->setCurrentPosition(0);
@@ -69,6 +69,8 @@ void Motion::setPosition(float x, float y, float e) {
 }
 
 void Motion::move(float x, float y, float e) {
+  enable();
+
   if(relative_mode_) {
     x += position_x_;
     y += position_y_;
@@ -89,11 +91,20 @@ void Motion::move(float x, float y, float e) {
 float Motion::getStationaryX() {
   return relative_mode_ ? 0 : position_x_;
 }
-
 float Motion::getStationaryY() {
   return relative_mode_ ? 0 : position_y_;
 }
-
 float Motion::getStationaryE() {
   return relative_mode_ ? 0 : position_e_;
 }
+
+float Motion::getX() {
+  return position_x_;
+}
+float Motion::getY() {
+  return position_y_;
+}
+float Motion::getE() {
+  return position_e_;
+}
+

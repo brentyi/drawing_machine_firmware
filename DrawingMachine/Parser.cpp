@@ -39,6 +39,10 @@ void Parser::execute_buffer_() {
       controller_->disable();
       ready("disabled steppers");
       return;
+    case 84:
+      controller_->disable();
+      ready("stopped idle hold");
+      return;
     case 105:
       // read temperatures
       ready("T:22 B:22");
@@ -88,11 +92,16 @@ void Parser::execute_buffer_() {
       return;
     case 91:
       controller_->relative();
-      ready("set relative mode");
+       ready("set relative mode");
       return;
     case 92:
       //set position
-      ready("set");
+      controller_->setPosition(
+        seek_float_('X', controller_->getX()),
+        seek_float_('Y', controller_->getY()),
+        seek_float_('E', controller_->getE())
+      );
+      ready("set positions");
       return;
   }
   ready("ignoring unsupported gcode");

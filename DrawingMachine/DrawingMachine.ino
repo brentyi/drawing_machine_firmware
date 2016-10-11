@@ -1,6 +1,3 @@
-#include <AccelStepper.h>
-#include <MultiStepper.h>
-
 /*
    Firmware for a turntable-based plotter/drawing machine
    Made for UC Berkeley's Prototyping & Fabrication Course

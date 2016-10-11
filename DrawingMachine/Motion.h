@@ -13,6 +13,7 @@ class Motion{
     float position_e_;
 
     bool relative_mode_;
+    bool pen_state_;
 
     MultiStepper *steppers_;
     AccelStepper *linear_stepper_;
@@ -29,6 +30,8 @@ class Motion{
     
     void enable();
     void disable();
+
+    void setPenState(bool state);
     
     void relative();
     void absolute();

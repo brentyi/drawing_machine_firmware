@@ -22,14 +22,14 @@ void Motion::init() {
 
   pinMode(PIN_LINEAR_MINSTOP, INPUT_PULLUP);
   pinMode(PIN_ENABLE, OUTPUT);
-
-  pen_state = 0;
-  setPenState(1);
   disable();
+  pen_state_ = 0;
+  setPenState(1);
 }
 
 void Motion::home() {
   enable();
+  setPenState(true);
 
   linear_stepper_->setSpeed(-1 * LINEAR_HOMESPEED);
   while (digitalRead(PIN_LINEAR_MINSTOP)) {
@@ -40,8 +40,8 @@ void Motion::home() {
 
   linear_stepper_->setCurrentPosition(0);
 
-  rotary_stepper_->move((long) (1.57 * STEPS_PER_RADIAN));
-  rotary_stepper_->runToPosition();
+  //rotary_stepper_->move((long) (1.57 * STEPS_PER_RADIAN));
+  //rotary_stepper_->runToPosition();
   rotary_stepper_->setCurrentPosition(0);
 
   setPosition(0, 0, 0);
@@ -54,7 +54,7 @@ void Motion::disable() {
 
 void Motion::enable() {
   digitalWrite(PIN_ENABLE, HIGH);
-  setPenState(true);
+  //setPenState(true);
 }
 
 void Motion::relative() {
@@ -72,8 +72,8 @@ void Motion::setPenState(bool state) {
   
   if(state) {
     analogWrite(PIN_SOLENOID, 255);
-    delay(100);
-    analogWrite(PIN_SOLENOID, 180);
+    delay(200);
+    analogWrite(PIN_SOLENOID, 190);
   } else {
     analogWrite(PIN_SOLENOID, 0);
   }

@@ -12,6 +12,7 @@ Parser parser;
 
 void setup() {
   Serial.begin(BAUDRATE);
+  delay(10);
   Serial.println("start");
   Serial.println(">> Drawing Machine");
   Serial.println(">> DES INV 22 // Fall 2016 Midterm");

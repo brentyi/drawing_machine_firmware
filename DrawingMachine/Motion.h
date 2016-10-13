@@ -15,6 +15,8 @@ class Motion{
     bool relative_mode_;
     bool pen_state_;
 
+    void moveDirect_(float x, float y, float e);
+
     MultiStepper *steppers_;
     AccelStepper *linear_stepper_;
     AccelStepper *rotary_stepper_;
@@ -23,8 +25,6 @@ class Motion{
     void setPosition(float x, float y, float e);
 
     void move(float x, float y, float e);
-
-    void moveDirect(float x, float y, float e);
     
     void home();
     

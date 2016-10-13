@@ -86,11 +86,8 @@ void Motion::setPosition(float x, float y, float e) {
   position_e_ = e;
 }
 
-void Motion::moveDirect(float x, float y, float e) {
+void Motion::moveDirect_(float x, float y, float e) {
   setPenState(e <= position_e_);
-  
-  position_e_ = e;
-
   long linear_position = sqrt(x * x + y * y) * (long) STEPS_PER_MM;
   long rotary_position = (long) (atan2(y, x) * STEPS_PER_RADIAN);
   long positions[2] = {
@@ -99,10 +96,6 @@ void Motion::moveDirect(float x, float y, float e) {
   };
   steppers_->moveTo(positions);
   steppers_->runSpeedToPosition();
-
-  position_x_ = x;
-  position_y_ = y;
-  position_e_ = e;
 }
 void Motion::move(float x, float y, float e) {
   enable();
@@ -112,28 +105,32 @@ void Motion::move(float x, float y, float e) {
     y += position_y_;
     e += position_e_;
   }
+  float x_offset = x - position_x_;
+  float y_offset = y - position_y_;
+  float e_offset = e - position_e_;
+  float distance = sqrt(x_offset * x_offset + y_offset * y_offset);
 
-  //brent method "This is not the proper way to do it, we need to figure this out"
-  float distance = sqrt(x * x + y * y);
-  if(distance <= MAX_DIST){
-    moveDirect(x,y,e);
-  }
-  else{
-    int frac = distance / MOVE_AMOUNT; 
+  // partition longer movements and complete them in segments
+  // this compensates for the nonlinearity of the motion system
+  //
+  // TODO: consider disabling for pure travel movements
+  uint8_t segments = distance / SEGMENTATION_LENGTH + 1;
+  Serial.print("Broke linear movement into ");
+  Serial.print(segments);
+  Serial.println(" segments");
 
-    float x_offset = x - position_x_;
-    float y_offset = y - position_y_;
-    float e_offset = e - position_e_;
-    for(int i = 1; i <= frac; i++){ //brent you should fix it
-      Serial.print(i);
-      moveDirect(
-        position_x_ + x_offset * i / frac,
-        position_y_ + y_offset * i / frac,
-        position_e_ + e_offset * i / frac
-      );
-      Serial.print(frac);
-    }
+  for(int i = 1; i <= segments; i++){
+    Serial.println(i);
+    moveDirect_(
+      position_x_ + x_offset * i / segments,
+      position_y_ + y_offset * i / segments,
+      position_e_ + e_offset * i / segments
+    );
   }
+
+  position_x_ = x;
+  position_y_ = y;
+  position_e_ = e;
 }
 
 

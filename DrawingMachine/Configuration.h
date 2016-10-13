@@ -12,14 +12,14 @@
   #define LINEAR_DIR 1
 #define ROTARY_DIR 1
 
-/// Movement related thingys
+/// Movement
 #define LINEAR_HOMESPEED 30000
-#define LINEAR_MAXSPEED 50000
+#define LINEAR_MAXSPEED 30000
 #define ROTARY_MAXSPEED 1000
 #define LINEAR_ACCEL 50000
 #define ROTARY_ACCEL 5000
-#define MAX_DIST 400
-#define MOVE_AMOUNT 2
+
+#define SEGMENTATION_LENGTH 2
 
 /// Pin configuration
 #define PIN_ROTARY_STEP 2

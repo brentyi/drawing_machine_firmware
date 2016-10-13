@@ -1,26 +1,26 @@
 #include <Arduino.h>
-#include "Parser.h"
+#include "GCodeParser.h"
 #include "Configuration.h"
 
-Parser::Parser() {
+GCodeParser::GCodeParser() {
   buffer_count_ = 0;
 }
 
-void Parser::handle(char c) {
+void GCodeParser::handle(char c) {
   if (c == '\n' || c == ';') {
     buffer_[buffer_count_] = '\0';
-    execute_buffer_();
+    executeBuffer_();
   } else if (buffer_count_ < BUFFER_LENGTH - 1) {
     buffer_[buffer_count_++] = c;
   }
 }
 
-void Parser::attachMotionController(Motion *m) {
+void GCodeParser::attachMotionController(MotionController *m) {
   controller_ = m;
 }
 
-void Parser::execute_buffer_() {
-  switch (seek_int_('M', -1)) {
+void GCodeParser::executeBuffer_() {
+  switch (seekInt_('M', -1)) {
     case -1:
       break;
     case 0:
@@ -57,28 +57,28 @@ void Parser::execute_buffer_() {
       return;
   }
 
-  switch (seek_int_('G', -1)) {
+  switch (seekInt_('G', -1)) {
     case -1:
       break;
     case 0:
       controller_->move(
-        seek_float_('X', controller_->getStationaryX()),
-        seek_float_('Y', controller_->getStationaryY()),
-        seek_float_('E', controller_->getStationaryE())
+        seekFloat_('X', controller_->getStationaryX()),
+        seekFloat_('Y', controller_->getStationaryY()),
+        seekFloat_('E', controller_->getStationaryE())
       );
       ready("rapid");
       return;
     case 1:
       controller_->move(
-        seek_float_('X', controller_->getStationaryX()),
-        seek_float_('Y', controller_->getStationaryY()),
-        seek_float_('E', controller_->getStationaryE())
+        seekFloat_('X', controller_->getStationaryX()),
+        seekFloat_('Y', controller_->getStationaryY()),
+        seekFloat_('E', controller_->getStationaryE())
       );
       ready("linear");
       return;
     case 4:
-      delay(seek_float_('P', 0));
-      delay(seek_float_('S', 0) * 1000);
+      delay(seekFloat_('P', 0));
+      delay(seekFloat_('S', 0) * 1000);
       ready("dwell");
       return;
     case 28:
@@ -97,9 +97,9 @@ void Parser::execute_buffer_() {
     case 92:
       //set position
       controller_->setPosition(
-        seek_float_('X', controller_->getX()),
-        seek_float_('Y', controller_->getY()),
-        seek_float_('E', controller_->getE())
+        seekFloat_('X', controller_->getX()),
+        seekFloat_('Y', controller_->getY()),
+        seekFloat_('E', controller_->getE())
       );
       ready("set positions");
       return;
@@ -108,7 +108,7 @@ void Parser::execute_buffer_() {
 }
 
 // announce that we're ready for the next command
-void Parser::ready(char comment[]) {
+void GCodeParser::ready(char comment[]) {
   buffer_count_ = 0;
   Serial.print("ok ");
   Serial.println(comment);
@@ -118,7 +118,7 @@ void Parser::ready(char comment[]) {
 //
 // if we have 'G100' buffered and we call seek with prefix = 'G',
 // this function should return 100
-int32_t Parser::seek_int_(char prefix, int default_value) {
+int32_t GCodeParser::seekInt_(char prefix, int default_value) {
   char *ptr = strchr(buffer_, prefix) + 1;
   if (!ptr || ptr < buffer_ || ptr >= buffer_ + buffer_count_) {
     return default_value;
@@ -126,8 +126,8 @@ int32_t Parser::seek_int_(char prefix, int default_value) {
   return atoi(ptr);
 }
 
-// floating point version of seek_int_()
-float Parser::seek_float_(char prefix, float default_value) {
+// floating point version of seekInt_()
+float GCodeParser::seekFloat_(char prefix, float default_value) {
   char *ptr = strchr(buffer_, prefix) + 1;
   if (!ptr || ptr < buffer_ || ptr >= buffer_ + buffer_count_) {
     return default_value;

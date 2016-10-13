@@ -2,9 +2,9 @@
 #include <MultiStepper.h>
 
 #include "Configuration.h"
-#include "Motion.h"
+#include "MotionController.h"
 
-void Motion::init() {
+void MotionController::init() {
   linear_stepper_ = new AccelStepper(AccelStepper::DRIVER, PIN_LINEAR_STEP, PIN_LINEAR_DIR);
   rotary_stepper_ = new AccelStepper(AccelStepper::DRIVER, PIN_ROTARY_STEP, PIN_ROTARY_DIR);
 
@@ -27,7 +27,7 @@ void Motion::init() {
   setPenState(1);
 }
 
-void Motion::home() {
+void MotionController::home() {
   enable();
   setPenState(true);
 
@@ -47,25 +47,25 @@ void Motion::home() {
   setPosition(0, 0, 0);
 }
 
-void Motion::disable() {
+void MotionController::disable() {
   digitalWrite(PIN_ENABLE, LOW);
   setPenState(false);
 }
 
-void Motion::enable() {
+void MotionController::enable() {
   digitalWrite(PIN_ENABLE, HIGH);
   //setPenState(true);
 }
 
-void Motion::relative() {
+void MotionController::relative() {
   relative_mode_ = true;
 }
 
-void Motion::absolute() {
+void MotionController::absolute() {
   relative_mode_ = false;
 }
 
-void Motion::setPenState(bool state) {
+void MotionController::setPenState(bool state) {
   if(state == pen_state_) {
     return;
   }
@@ -80,13 +80,13 @@ void Motion::setPenState(bool state) {
   pen_state_ = state;
 }
 
-void Motion::setPosition(float x, float y, float e) {
+void MotionController::setPosition(float x, float y, float e) {
   position_x_ = x;
   position_y_ = y;
   position_e_ = e;
 }
 
-void Motion::moveDirect_(float x, float y, float e) {
+void MotionController::moveDirect_(float x, float y, float e) {
   setPenState(e <= position_e_);
   long linear_position = sqrt(x * x + y * y) * (long) STEPS_PER_MM;
   long rotary_position = (long) (atan2(y, x) * STEPS_PER_RADIAN);
@@ -97,7 +97,7 @@ void Motion::moveDirect_(float x, float y, float e) {
   steppers_->moveTo(positions);
   steppers_->runSpeedToPosition();
 }
-void Motion::move(float x, float y, float e) {
+void MotionController::move(float x, float y, float e) {
   enable();
 
   if(relative_mode_) {
@@ -135,23 +135,23 @@ void Motion::move(float x, float y, float e) {
 
 
 
-float Motion::getStationaryX() {
+float MotionController::getStationaryX() {
   return relative_mode_ ? 0 : position_x_;
 }
-float Motion::getStationaryY() {
+float MotionController::getStationaryY() {
   return relative_mode_ ? 0 : position_y_;
 }
-float Motion::getStationaryE() {
+float MotionController::getStationaryE() {
   return relative_mode_ ? 0 : position_e_;
 }
 
-float Motion::getX() {
+float MotionController::getX() {
   return position_x_;
 }
-float Motion::getY() {
+float MotionController::getY() {
   return position_y_;
 }
-float Motion::getE() {
+float MotionController::getE() {
   return position_e_;
 }
 

@@ -6,7 +6,7 @@
 
 #include "Configuration.h"
 
-class Motion{
+class MotionController{
   private:
     float position_x_;
     float position_y_;

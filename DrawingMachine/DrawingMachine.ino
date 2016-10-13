@@ -4,11 +4,11 @@
 */
 
 #include "Configuration.h"
-#include "Parser.h"
-#include "Motion.h"
+#include "GCodeParser.h"
+#include "MotionController.h"
 
-Motion motion;
-Parser parser;
+MotionController motion;
+GCodeParser parser;
 
 void setup() {
   Serial.begin(BAUDRATE);

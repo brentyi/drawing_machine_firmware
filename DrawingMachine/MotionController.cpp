@@ -119,7 +119,7 @@ void MotionController::move(float x, float y, float e) {
 }
 
 void MotionController::moveDirect_(float x, float y) {
-  rotary_position_ = fmod(rotary_position_, 2 * PI);
+  rotary_position_ %= (int32_t) (2 * PI * STEPS_PER_RADIAN);
 
   int32_t linear_goal = -1 * sqrt(x * x + y * y) * (int32_t) STEPS_PER_MM;
   int32_t rotary_goal = fmod(PI + atan2(y, x), 2 * PI) * (int32_t) STEPS_PER_RADIAN;

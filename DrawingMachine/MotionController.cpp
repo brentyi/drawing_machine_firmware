@@ -24,32 +24,25 @@ void MotionController::init() {
   pinMode(PIN_ENABLE, OUTPUT);
   disable();
   pen_state_ = 0;
-  setPenState(1);
+  setPenState(PenState::DOWN);
 }
 
 void MotionController::home() {
   enable();
-  setPenState(true);
+  setPenState(PenState::UP);
 
   linear_stepper_->setSpeed(-1 * LINEAR_HOMESPEED);
   while (digitalRead(PIN_LINEAR_MINSTOP)) {
     linear_stepper_->runSpeed();
   }
-  linear_stepper_->move((long) TABLE_DIAMETER /  2 * STEPS_PER_MM);
-  linear_stepper_->runToPosition();
-
-  linear_stepper_->setCurrentPosition(0);
-
-  //rotary_stepper_->move((long) (1.57 * STEPS_PER_RADIAN));
-  //rotary_stepper_->runToPosition();
+  linear_stepper_->setCurrentPosition(-(long) TABLE_DIAMETER /  2 * STEPS_PER_MM);
   rotary_stepper_->setCurrentPosition(0);
-
-  setPosition(0, 0, 0);
+  setPosition(-TABLE_DIAMETER / 2.0, 0, 0);
 }
 
 void MotionController::disable() {
   digitalWrite(PIN_ENABLE, LOW);
-  setPenState(false);
+  setPenState(PenState::UP);
 }
 
 void MotionController::enable() {
@@ -65,12 +58,12 @@ void MotionController::absolute() {
   relative_mode_ = false;
 }
 
-void MotionController::setPenState(bool state) {
+void MotionController::setPenState(PenState state) {
   if(state == pen_state_) {
     return;
   }
   
-  if(state) {
+  if(state == PenState::UP) {
     analogWrite(PIN_SOLENOID, 255);
     delay(200);
     analogWrite(PIN_SOLENOID, 190);
@@ -87,7 +80,7 @@ void MotionController::setPosition(float x, float y, float e) {
 }
 
 void MotionController::moveDirect_(float x, float y, float e) {
-  setPenState(e <= position_e_);
+  setPenState(e > position_e_ ? PenState::DOWN : PenState::UP);
   long linear_position = sqrt(x * x + y * y) * (long) STEPS_PER_MM;
   long rotary_position = (long) (atan2(y, x) * STEPS_PER_RADIAN);
   long positions[2] = {
@@ -132,8 +125,6 @@ void MotionController::move(float x, float y, float e) {
   position_y_ = y;
   position_e_ = e;
 }
-
-
 
 float MotionController::getStationaryX() {
   return relative_mode_ ? 0 : position_x_;

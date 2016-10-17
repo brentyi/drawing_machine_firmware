@@ -13,13 +13,15 @@ class MotionController{
     float position_e_;
 
     bool relative_mode_;
-    bool pen_state_;
+    int8_t pen_state_;
 
     void moveDirect_(float x, float y, float e);
 
     MultiStepper *steppers_;
     AccelStepper *linear_stepper_;
     AccelStepper *rotary_stepper_;
+
+    enum PenState{UP, DOWN};
   public:
     void init();
     void setPosition(float x, float y, float e);
@@ -31,7 +33,7 @@ class MotionController{
     void enable();
     void disable();
 
-    void setPenState(bool state);
+    void setPenState(PenState state);
     
     void relative();
     void absolute();

@@ -108,7 +108,7 @@ void GCodeParser::executeBuffer_() {
 }
 
 // announce that we're ready for the next command
-void GCodeParser::ready(char comment[]) {
+void GCodeParser::ready(const char comment[]) {
   buffer_count_ = 0;
   Serial.print("ok ");
   Serial.println(comment);

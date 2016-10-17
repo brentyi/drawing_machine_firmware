@@ -21,7 +21,7 @@ class GCodeParser {
     GCodeParser();
     void attachMotionController(MotionController *m);
     void handle(char c);
-    void ready(char comment[] = "");
+    void ready(const char comment[] = "");
 };
 
 #endif //PARSER_H

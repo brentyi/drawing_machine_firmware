@@ -1,5 +1,5 @@
-#ifndef PARSER_H
-#define PARSER_H
+#ifndef GCODEPARSER_H
+#define GCODEPARSER_H
 
 // Helper class for G-Code parsing
 
@@ -24,4 +24,4 @@ class GCodeParser {
     void ready(const char comment[] = "");
 };
 
-#endif //PARSER_H
+#endif //GCODEPARSER_H

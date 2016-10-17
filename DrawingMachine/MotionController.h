@@ -1,5 +1,5 @@
-#ifndef MOTION_H
-#define MOTION_H
+#ifndef MOTIONCONTROLLER_H
+#define MOTIONCONTROLLER_H
 
 #include <AccelStepper.h>
 #include <MultiStepper.h>
@@ -8,6 +8,9 @@
 
 class MotionController{
   private:
+    float linear_position_;
+    float rotary_position_;
+
     float position_x_;
     float position_y_;
     float position_e_;
@@ -46,4 +49,4 @@ class MotionController{
     float getE();
 };
 
-#endif MOTION_H
+#endif // MOTIONCONTROLLER_H

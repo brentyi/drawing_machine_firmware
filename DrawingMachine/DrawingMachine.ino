@@ -42,6 +42,6 @@ void loop() {
   if (Serial.available()) {
     digitalWrite(PIN_LED_BLUE, HIGH);
     parser.handle(Serial.read());
+    digitalWrite(PIN_LED_BLUE, LOW);
   }
-  digitalWrite(PIN_LED_BLUE, LOW);
 }

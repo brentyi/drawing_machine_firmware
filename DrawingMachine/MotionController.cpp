@@ -35,9 +35,11 @@ void MotionController::home() {
   while (digitalRead(PIN_LINEAR_MINSTOP)) {
     linear_stepper_->runSpeed();
   }
-  linear_stepper_->setCurrentPosition(-(long) TABLE_DIAMETER /  2 * STEPS_PER_MM);
-  rotary_stepper_->setCurrentPosition(0);
-  setPosition(-TABLE_DIAMETER / 2.0, 0, 0);
+
+  rotary_position_ = 0; 
+  linear_position_ = -TABLE_DIAMETER / 2.0;
+  setPosition(linear_position_, 0, 0);
+  move(position_x_ * 0.95, 0, 0);
 }
 
 void MotionController::disable() {
@@ -47,7 +49,6 @@ void MotionController::disable() {
 
 void MotionController::enable() {
   digitalWrite(PIN_ENABLE, HIGH);
-  //setPenState(true);
 }
 
 void MotionController::relative() {
@@ -80,15 +81,44 @@ void MotionController::setPosition(float x, float y, float e) {
 }
 
 void MotionController::moveDirect_(float x, float y, float e) {
+  //
+  // TODO: probably okay for now, but consider revisiting the implementation of this function
+  // - unideal integration of floating point errors over time
+  // - no fpu, so all the math is going to take forever
+  //
   setPenState(e > position_e_ ? PenState::DOWN : PenState::UP);
-  long linear_position = sqrt(x * x + y * y) * (long) STEPS_PER_MM;
-  long rotary_position = (long) (atan2(y, x) * STEPS_PER_RADIAN);
-  long positions[2] = {
-    linear_position,//linear position
-    rotary_position //rotary position
+
+  rotary_position_ = fmod(rotary_position_, 2 * PI);
+
+  float linear_goal = -1 * sqrt(x * x + y * y);// * (int32_t) STEPS_PER_MM;
+  float rotary_goal = fmod(PI + atan2(y, x), 2 * PI);// * (int32_t) STEPS_PER_RADIAN;
+
+  float linear_delta = linear_goal - linear_position_;
+  float rotary_delta = rotary_goal - rotary_position_;
+
+  if (abs(x) < 0.1 && abs(y) < 0.1) {
+    //no point in rotating if we're moving to the center
+    rotary_delta = 0;
+  }
+  
+  if (rotary_delta > PI) {
+    rotary_delta -= 2 * PI;
+  } else if (rotary_delta < -PI) {
+    rotary_delta += 2 * PI;
+  }
+  
+  int32_t positions[2] = {
+    (int32_t) (linear_delta * STEPS_PER_MM),
+    (int32_t) (rotary_delta * STEPS_PER_RADIAN)
   };
+
+  linear_stepper_->setCurrentPosition(0);
+  rotary_stepper_->setCurrentPosition(0);
   steppers_->moveTo(positions);
   steppers_->runSpeedToPosition();
+
+  linear_position_ = linear_goal;
+  rotary_position_ = rotary_goal;
 }
 void MotionController::move(float x, float y, float e) {
   enable();

@@ -19,7 +19,7 @@
 #define LINEAR_ACCEL 50000
 #define ROTARY_ACCEL 50000
 
-#define SEGMENTATION_LENGTH 2
+#define SEGMENTATION_LENGTH 1
 
 /// Pin configuration
 #define PIN_ROTARY_STEP 2

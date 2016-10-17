@@ -97,8 +97,8 @@ void MotionController::move(float x, float y, float e) {
   float distance = sqrt(x_offset * x_offset + y_offset * y_offset);
 
   // partition longer "write" movements and complete them in segments
-  // hackish compensation for the nonlinearity of the motion system
-  // TODO: properly figure out the math/motion profiling for this
+  // this sacrifices quality for both physical & computational speed
+  // moveStraight_() will make more mathmetically precise movements, but runs slowly
 
   uint8_t segments = pen_state_ == PenState::DOWN ? distance / SEGMENTATION_LENGTH + 1 : 1;
   Serial.print("Broke linear movement into ");
@@ -150,6 +150,50 @@ void MotionController::moveDirect_(float x, float y) {
 
   linear_position_ = linear_goal;
   rotary_position_ = rotary_goal;
+}
+
+void MotionController::moveStraight_(float x, float y) {
+  // calculations for reference: http://i.imgur.com/rBGpZ9P.jpg
+  
+  enable();
+
+  rotary_position_ %= (int32_t) (2 * PI * STEPS_PER_RADIAN);
+
+  float dx = x - position_x_;
+  float dy = y - position_y_;
+  float distance = sqrt(dx * dx + dy * dy);
+
+  float theta = -1;
+  float p = -1;
+  float cosine = -1;
+  float sine = -1;
+  while (distance > 0.1){ 
+    if (p >= 0) {
+      linear_stepper_->runSpeed();
+      rotary_stepper_->runSpeed();
+      linear_position_ += linear_stepper_->currentPosition();
+      rotary_position_ += rotary_stepper_->currentPosition();
+      linear_stepper_->setCurrentPosition(0);
+      rotary_stepper_->setCurrentPosition(0);
+    }
+    
+    theta = rotary_position_ / (float)STEPS_PER_RADIAN;
+    p = linear_position_ / (float)STEPS_PER_MM;
+    cosine = cos(theta); // avoid recalculating
+    sine = sin(theta);
+    
+    position_x_ = p * cosine;
+    position_y_ = p * sine;
+  
+    dx = position_x_ - x;
+    dy = position_y_ - y;
+    distance = sqrt(dx * dx + dy * dy); // is there a way to speed this up?
+    dx /= distance; // normalize
+    dy /= distance;
+
+    linear_stepper_->setSpeed((dx * cosine + dy * sine) * 5000);
+    rotary_stepper_->setSpeed((dy * cosine / p - dx * sine / p) * 5000);
+  }
 }
 
 float MotionController::getStationaryX() {

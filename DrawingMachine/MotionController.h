@@ -18,7 +18,8 @@ class MotionController{
     bool relative_mode_;
     int8_t pen_state_;
 
-    void moveDirect_(float x, float y);
+    void moveDirect_(float x, float y); // make the fastest & simplest movement possible
+    void moveStraight_(float x, float y); // move in a geometrically straight line
 
     MultiStepper *steppers_;
     AccelStepper *linear_stepper_;

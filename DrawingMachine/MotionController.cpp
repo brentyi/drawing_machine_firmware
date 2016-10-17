@@ -133,11 +133,11 @@ void MotionController::move(float x, float y, float e) {
   float e_offset = e - position_e_;
   float distance = sqrt(x_offset * x_offset + y_offset * y_offset);
 
-  // partition longer movements and complete them in segments
-  // this compensates for the nonlinearity of the motion system
-  //
-  // TODO: consider disabling for pure travel movements
-  uint8_t segments = distance / SEGMENTATION_LENGTH + 1;
+  // partition longer "write" movements and complete them in segments
+  // hackish compensation for the nonlinearity of the motion system
+  // TODO: properly figure out the math/motion profiling for this
+
+  uint8_t segments = pen_state_ == PenState::DOWN ? distance / SEGMENTATION_LENGTH + 1 : 1;
   Serial.print("Broke linear movement into ");
   Serial.print(segments);
   Serial.println(" segments");

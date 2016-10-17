@@ -67,7 +67,7 @@ void MotionController::setPenState(PenState state) {
   if(state == PenState::UP) {
     analogWrite(PIN_SOLENOID, 255);
     delay(200);
-    analogWrite(PIN_SOLENOID, 190);
+    analogWrite(PIN_SOLENOID, 180);
   } else {
     analogWrite(PIN_SOLENOID, 0);
   }

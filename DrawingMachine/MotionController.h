@@ -8,17 +8,17 @@
 
 class MotionController{
   private:
-    float linear_position_;
-    float rotary_position_;
+    int32_t linear_position_; //steps
+    int32_t rotary_position_; //steps
 
-    float position_x_;
-    float position_y_;
+    float position_x_; //mm
+    float position_y_; //mm
     float position_e_;
 
     bool relative_mode_;
     int8_t pen_state_;
 
-    void moveDirect_(float x, float y, float e);
+    void moveDirect_(float x, float y);
 
     MultiStepper *steppers_;
     AccelStepper *linear_stepper_;

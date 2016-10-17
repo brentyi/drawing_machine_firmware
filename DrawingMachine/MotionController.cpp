@@ -20,6 +20,9 @@ void MotionController::init() {
 
   relative_mode_ = false;
 
+  linear_position_ = 0;
+  rotary_position_ = 0;
+
   pinMode(PIN_LINEAR_MINSTOP, INPUT_PULLUP);
   pinMode(PIN_ENABLE, OUTPUT);
   disable();
@@ -36,8 +39,8 @@ void MotionController::home() {
     linear_stepper_->runSpeed();
   }
 
-  linear_position_ = -TABLE_DIAMETER / 2.0;
-  setPosition(linear_position_, 0, 0);
+  setPosition(-TABLE_DIAMETER / 2.0, 0, 0);
+  linear_position_ = position_x_ * STEPS_PER_MM;
   move(position_x_ * 0.95, 0, 0);
 }
 
@@ -79,48 +82,10 @@ void MotionController::setPosition(float x, float y, float e) {
   position_e_ = e;
 }
 
-void MotionController::moveDirect_(float x, float y, float e) {
-  //
-  // TODO: probably okay for now, but consider revisiting the implementation of this function
-  // - unideal integration of floating point errors over time
-  // - no fpu, so all the math is going to take forever
-  //
-  setPenState(e > position_e_ ? PenState::DOWN : PenState::UP);
 
-  rotary_position_ = fmod(rotary_position_, 2 * PI);
-
-  float linear_goal = -1 * sqrt(x * x + y * y);// * (int32_t) STEPS_PER_MM;
-  float rotary_goal = fmod(PI + atan2(y, x), 2 * PI);// * (int32_t) STEPS_PER_RADIAN;
-
-  float linear_delta = linear_goal - linear_position_;
-  float rotary_delta = rotary_goal - rotary_position_;
-
-  if (abs(x) < 0.1 && abs(y) < 0.1) {
-    //no point in rotating if we're moving to the center
-    rotary_delta = 0;
-  }
-  
-  if (rotary_delta > PI) {
-    rotary_delta -= 2 * PI;
-  } else if (rotary_delta < -PI) {
-    rotary_delta += 2 * PI;
-  }
-  
-  int32_t positions[2] = {
-    (int32_t) (linear_delta * STEPS_PER_MM),
-    (int32_t) (rotary_delta * STEPS_PER_RADIAN)
-  };
-
-  linear_stepper_->setCurrentPosition(0);
-  rotary_stepper_->setCurrentPosition(0);
-  steppers_->moveTo(positions);
-  steppers_->runSpeedToPosition();
-
-  linear_position_ = linear_goal;
-  rotary_position_ = rotary_goal;
-}
 void MotionController::move(float x, float y, float e) {
   enable();
+  setPenState(e > position_e_ ? PenState::DOWN : PenState::UP);
 
   if(relative_mode_) {
     x += position_x_;
@@ -129,7 +94,6 @@ void MotionController::move(float x, float y, float e) {
   }
   float x_offset = x - position_x_;
   float y_offset = y - position_y_;
-  float e_offset = e - position_e_;
   float distance = sqrt(x_offset * x_offset + y_offset * y_offset);
 
   // partition longer "write" movements and complete them in segments
@@ -145,14 +109,47 @@ void MotionController::move(float x, float y, float e) {
     Serial.println(i);
     moveDirect_(
       position_x_ + x_offset * i / segments,
-      position_y_ + y_offset * i / segments,
-      position_e_ + e_offset * i / segments
+      position_y_ + y_offset * i / segments
     );
   }
 
   position_x_ = x;
   position_y_ = y;
   position_e_ = e;
+}
+
+void MotionController::moveDirect_(float x, float y) {
+  rotary_position_ = fmod(rotary_position_, 2 * PI);
+
+  int32_t linear_goal = -1 * sqrt(x * x + y * y) * (int32_t) STEPS_PER_MM;
+  int32_t rotary_goal = fmod(PI + atan2(y, x), 2 * PI) * (int32_t) STEPS_PER_RADIAN;
+
+  int32_t linear_delta = linear_goal - linear_position_;
+  int32_t rotary_delta = rotary_goal - rotary_position_;
+
+  if (abs(x) < 0.1 && abs(y) < 0.1) {
+    //no point in rotating if we're moving to the center
+    rotary_delta = 0;
+  }
+  
+  if (rotary_delta > PI * STEPS_PER_RADIAN) {
+    rotary_delta -= 2 * PI * STEPS_PER_RADIAN;
+  } else if (rotary_delta < -PI * STEPS_PER_RADIAN) {
+    rotary_delta += 2 * PI * STEPS_PER_RADIAN;
+  }
+  
+  int32_t positions[2] = {
+    linear_delta,
+    rotary_delta
+  };
+
+  linear_stepper_->setCurrentPosition(0);
+  rotary_stepper_->setCurrentPosition(0);
+  steppers_->moveTo(positions);
+  steppers_->runSpeedToPosition();
+
+  linear_position_ = linear_goal;
+  rotary_position_ = rotary_goal;
 }
 
 float MotionController::getStationaryX() {

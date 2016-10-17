@@ -11,16 +11,18 @@ MotionController motion;
 GCodeParser parser;
 
 void setup() {
+  pinMode(PIN_LED_BLUE, OUTPUT);
+  pinMode(PIN_LED_RED, OUTPUT);
+  pinMode(PIN_BUTTON, INPUT_PULLUP);
+
+  digitalWrite(PIN_LED_BLUE, HIGH);
+  
   Serial.begin(BAUDRATE);
   delay(10);
   Serial.println("start");
   Serial.println(">> Drawing Machine");
   Serial.println(">> DES INV 22 // Fall 2016 Midterm");
   Serial.println(">> Nandita Iyer & Brent Yi");
-
-  pinMode(PIN_LED_BLUE, OUTPUT);
-  pinMode(PIN_LED_RED, OUTPUT);
-  pinMode(PIN_BUTTON, INPUT_PULLUP);
 
   for (int i = 0; i < 3; i++) {
     digitalWrite(PIN_LED_RED, HIGH);

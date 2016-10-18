@@ -7,9 +7,11 @@ GCodeParser::GCodeParser() {
 }
 
 void GCodeParser::handle(char c) {
-  if (c == '\n' || c == ';') {
+  if (c == '\n') { // end line - execute the buffered command!
     buffer_[buffer_count_] = '\0';
     executeBuffer_();
+  } else if (c == ';') { // start of a g-code comment
+    buffer_[buffer_count_++] = '\0';
   } else if (buffer_count_ < BUFFER_LENGTH - 1) {
     buffer_[buffer_count_++] = c;
   }
@@ -20,6 +22,9 @@ void GCodeParser::attachMotionController(MotionController *m) {
 }
 
 void GCodeParser::executeBuffer_() {
+  if (buffer_[0] == '\0') //empty buffer
+    return;
+  
   switch (seekInt_('M', -1)) {
     case -1:
       break;

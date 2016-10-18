@@ -98,7 +98,7 @@ void MotionController::move(float x, float y, float e) {
 
   // partition longer "write" movements and complete them in segments
   // this sacrifices quality for both physical & computational speed
-  // moveStraight_() will make more mathmetically precise movements, but runs slowly
+  // moveStraight_() will make more mathmetically precise movements
 
   uint8_t segments = pen_state_ == PenState::DOWN ? distance / SEGMENTATION_LENGTH + 1 : 1;
   Serial.print("Broke linear movement into ");
@@ -163,6 +163,9 @@ void MotionController::moveStraight_(float x, float y) {
   float dy = y - position_y_;
   float distance = sqrt(dx * dx + dy * dy);
 
+  linear_stepper_->setCurrentPosition(0);
+  rotary_stepper_->setCurrentPosition(0);
+
   float theta = -1;
   float p = -1;
   float cosine = -1;
@@ -187,12 +190,12 @@ void MotionController::moveStraight_(float x, float y) {
   
     dx = position_x_ - x;
     dy = position_y_ - y;
-    distance = sqrt(dx * dx + dy * dy); // is there a way to speed this up?
+    distance = sqrt(dx * dx + dy * dy);
     dx /= distance; // normalize
     dy /= distance;
 
-    linear_stepper_->setSpeed((dx * cosine + dy * sine) * 5000);
-    rotary_stepper_->setSpeed((dy * cosine / p - dx * sine / p) * 5000);
+    linear_stepper_->setSpeed((dx * cosine + dy * sine) * STEPS_PER_MM * 5);
+    rotary_stepper_->setSpeed((dy * cosine / p - dx * sine / p) * STEPS_PER_RADIAN * 5);
   }
 }
 

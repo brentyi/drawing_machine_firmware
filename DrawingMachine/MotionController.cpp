@@ -38,7 +38,7 @@ void MotionController::home() {
     linear_stepper_->runSpeed();
   }
 
-  setPosition(-TABLE_DIAMETER / 2.0, 0, 0);
+  position_x_ = -TABLE_DIAMETER / 2.0;
   linear_position_ = position_x_ * STEPS_PER_MM;
   move(position_x_ * 0.95, 0, position_e_);
 }

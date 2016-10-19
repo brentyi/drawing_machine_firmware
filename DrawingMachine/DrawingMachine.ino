@@ -6,9 +6,12 @@
 #include "Configuration.h"
 #include "GCodeParser.h"
 #include "MotionController.h"
+#include "DefaultProgram.h"
+#include <avr/pgmspace.h>
 
 MotionController motion;
 GCodeParser parser;
+const char default_program[] PROGMEM = {DEFAULT_PROGRAM};
 
 void setup() {
   pinMode(PIN_LED_BLUE, OUTPUT);
@@ -16,7 +19,7 @@ void setup() {
   pinMode(PIN_BUTTON, INPUT_PULLUP);
 
   digitalWrite(PIN_LED_BLUE, HIGH);
-  
+
   Serial.begin(BAUDRATE);
   delay(10);
   Serial.println("start");
@@ -44,6 +47,13 @@ void loop() {
   if (Serial.available()) {
     digitalWrite(PIN_LED_BLUE, HIGH);
     parser.handle(Serial.read());
-    digitalWrite(PIN_LED_BLUE, LOW);
+  } else if (!digitalRead(PIN_BUTTON)) {
+    digitalWrite(PIN_LED_BLUE, HIGH);
+    int len = strlen_P(default_program);
+    for (uint32_t k = 0; k < len; k++)
+    {
+      parser.handle((char) pgm_read_byte_near(default_program + k));
+    }
   }
+  digitalWrite(PIN_LED_BLUE, LOW);
 }

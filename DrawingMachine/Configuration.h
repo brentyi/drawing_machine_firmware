@@ -42,3 +42,6 @@
 /// Firmware-y constants
 #define BAUDRATE 115200
 #define BUFFER_LENGTH 100
+
+// Default drawing
+#define DEFAULT_DRAWING 

@@ -26,7 +26,6 @@ void MotionController::init() {
   pinMode(PIN_LINEAR_MINSTOP, INPUT_PULLUP);
   pinMode(PIN_ENABLE, OUTPUT);
   disable();
-  pen_state_ = 0;
   setPenState(PenState::DOWN);
 }
 
@@ -41,7 +40,7 @@ void MotionController::home() {
 
   setPosition(-TABLE_DIAMETER / 2.0, 0, 0);
   linear_position_ = position_x_ * STEPS_PER_MM;
-  move(position_x_ * 0.95, 0, position_e_ + 1);
+  move(position_x_ * 0.95, 0, position_e_);
 }
 
 void MotionController::disable() {
@@ -68,8 +67,8 @@ void MotionController::setPenState(PenState state) {
   
   if(state == PenState::UP) {
     analogWrite(PIN_SOLENOID, 255);
-    delay(200);
-    analogWrite(PIN_SOLENOID, 180);
+    delay(500);
+    analogWrite(PIN_SOLENOID, 190);
   } else {
     analogWrite(PIN_SOLENOID, 0);
   }

@@ -41,7 +41,7 @@ void MotionController::home() {
 
   setPosition(-TABLE_DIAMETER / 2.0, 0, 0);
   linear_position_ = position_x_ * STEPS_PER_MM;
-  move(position_x_ * 0.95, 0, 0);
+  move(position_x_ * 0.95, 0, position_e_ + 1);
 }
 
 void MotionController::disable() {

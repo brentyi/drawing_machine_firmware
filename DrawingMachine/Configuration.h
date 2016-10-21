@@ -9,7 +9,7 @@
 #define STEPS_PER_RADIAN 4309.42615 // 200 steps per revolution * 16 microsteps * 110 / 13 gear ratio / 2pi
 
 /// Directions
-  #define LINEAR_DIR 1
+#define LINEAR_DIR 1
 #define ROTARY_DIR 1
 
 /// Movement
@@ -42,6 +42,3 @@
 /// Firmware-y constants
 #define BAUDRATE 115200
 #define BUFFER_LENGTH 100
-
-// Default drawing
-#define DEFAULT_DRAWING 

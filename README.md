@@ -16,4 +16,12 @@ Currently implemented g-codes:
 - **G91:** relative mode
 - **G92:** set position
 
+---
+
+[Demo video](https://www.youtube.com/watch?v=BZjUXDSYovs) and relevant repositories:
+- [drawing machine dashboard application](http://github.com/brentyi/drawing_machine_dashboard)
+- [drawing machine mechanical design](http://github.com/nanditapiyer/drawing_machine_hardware)
+
+---
+
 Made possible by the [AccelStepper](http://www.airspayce.com/mikem/arduino/AccelStepper/) library.

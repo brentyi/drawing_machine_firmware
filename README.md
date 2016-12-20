@@ -1,5 +1,8 @@
 # Drawing Machine Firmware
-Arduino sketch + associated source files for running our 2.5D polar plotter.
+
+![drawing animation](animated.gif)
+
+Arduino sketch + associated source files for running our 2D polar plotter.
 
 Currently implemented g-codes:
 - **M0:** unconditional stop
